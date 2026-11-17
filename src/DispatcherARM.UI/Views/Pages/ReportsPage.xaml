@@ -1,0 +1,144 @@
+<UserControl x:Class="DispatcherARM.UI.Views.Pages.ReportsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             Loaded="ReportsPage_Loaded">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="8">
+            <DockPanel Margin="0,0,0,16">
+                <TextBlock Text="Отчёты и аналитика"
+                           Style="{StaticResource MaterialDesignHeadline5TextBlock}" />
+                <Button Content="Экспорт в CSV" Click="ExportCsv_Click"
+                        DockPanel.Dock="Right" HorizontalAlignment="Right"
+                        Style="{StaticResource MaterialDesignOutlinedButton}" Margin="8,0,0,0" />
+                <!-- Кнопка сравнения алгоритмов — научная часть диплома -->
+                <Button Content="🔬 Сравнить алгоритмы" Click="CompareAlgorithms_Click"
+                        DockPanel.Dock="Right" HorizontalAlignment="Right"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Background="#1E3A5F" Foreground="White"
+                        Margin="0,0,8,0"/>
+            </DockPanel>
+
+            <!-- Графики -->
+            <UniformGrid Columns="2" Margin="0,0,0,16">
+                <!-- Заказы по статусам (Pie) -->
+                <materialDesign:Card Padding="16" Margin="8" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <StackPanel>
+                        <TextBlock Text="Заказы по статусам"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                   Margin="0,0,0,8" />
+                        <lvc:PieChart x:Name="StatusPieChart" Height="250"
+                                      LegendPosition="Right" />
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Заказы по приоритетам -->
+                <materialDesign:Card Padding="16" Margin="8" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <StackPanel>
+                        <TextBlock Text="Заказы по приоритетам"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                   Margin="0,0,0,8" />
+                        <lvc:PieChart x:Name="PriorityPieChart" Height="250"
+                                      LegendPosition="Right" />
+                    </StackPanel>
+                </materialDesign:Card>
+            </UniformGrid>
+
+            <!-- Сводная статистика -->
+            <materialDesign:Card Padding="20" Margin="8,0,8,16" materialDesign:ElevationAssist.Elevation="Dp2">
+                <StackPanel>
+                    <TextBlock Text="Сводная статистика"
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                               Margin="0,0,0,12" />
+                    <DataGrid x:Name="StatsGrid"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              CanUserAddRows="False" HeadersVisibility="Column"
+                              materialDesign:DataGridAssist.CellPadding="12 6">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Показатель" Binding="{Binding Metric}" Width="*" />
+                            <DataGridTextColumn Header="Значение" Binding="{Binding Value}" Width="200" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </materialDesign:Card>
+
+            <!-- Сравнение алгоритмов -->
+            <materialDesign:Card Padding="20" Margin="8,0,8,16" materialDesign:ElevationAssist.Elevation="Dp2">
+                <StackPanel>
+                    <TextBlock Text="Сравнение алгоритмов оптимизации"
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                               Margin="0,0,0,4" />
+                    <TextBlock Text="Запустите построение маршрута для получения данных сравнения"
+                               Foreground="{DynamicResource MaterialDesign.Brush.Foreground.Light}"
+                               Margin="0,0,0,12" />
+                    <Button x:Name="CompareButton" Content="Сравнить алгоритмы на текущих заказах"
+                            Click="CompareAlgorithms_Click"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            HorizontalAlignment="Left" Margin="0,0,0,12" />
+                    <DataGrid x:Name="ComparisonGrid"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              CanUserAddRows="False" HeadersVisibility="Column"
+                              Visibility="Collapsed"
+                              materialDesign:DataGridAssist.CellPadding="12 6">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Алгоритм" Binding="{Binding Algorithm}" Width="*" />
+                            <DataGridTextColumn Header="Дистанция (км)" Binding="{Binding Distance}" Width="120" />
+                            <DataGridTextColumn Header="Время (мин)" Binding="{Binding Time}" Width="110" />
+                            <DataGridTextColumn Header="Расчёт (мс)" Binding="{Binding Elapsed}" Width="100" />
+                            <DataGridTextColumn Header="Результат" Binding="{Binding Status}" Width="100" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </materialDesign:Card>
+
+            <!-- ══ ЗАРПЛАТНАЯ ВЕДОМОСТЬ ══ -->
+            <materialDesign:Card Padding="16" Margin="8,0,8,16"
+                                 materialDesign:ElevationAssist.Elevation="Dp2">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,12">
+                        <TextBlock Text="💼 Зарплатная ведомость (текущий месяц)"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"/>
+                        <Button Content="📊 Экспорт для бухгалтерии (CSV)"
+                                Click="ExportPayrollCsv_Click"
+                                DockPanel.Dock="Right"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                Background="#3F51B5" Foreground="White"
+                                materialDesign:ButtonAssist.CornerRadius="4"/>
+                    </DockPanel>
+
+                    <TextBlock Foreground="Gray" FontSize="11" Margin="0,0,0,10"
+                               Text="Сводная таблица для выплаты зарплат. Экспортируйте в CSV и передайте в бухгалтерию."/>
+
+                    <DataGrid x:Name="PayrollGrid" MaxHeight="280"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              CanUserAddRows="False"
+                              materialDesign:DataGridAssist.CellPadding="8 4"
+                              HeadersVisibility="Column">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ФИО" Binding="{Binding FullName}" Width="*"/>
+                            <DataGridTextColumn Header="Телефон" Binding="{Binding Phone}" Width="130"/>
+                            <DataGridTextColumn Header="График" Binding="{Binding WorkSchedule}" Width="90"/>
+                            <DataGridTextColumn Header="Заказов" Binding="{Binding OrdersThisMonth}" Width="70"/>
+                            <DataGridTextColumn Header="Оклад (₽)" Binding="{Binding BaseSalary, StringFormat=N0}" Width="90"/>
+                            <DataGridTextColumn Header="Доп. выплаты (₽)" Binding="{Binding Bonuses, StringFormat=N0}" Width="120"/>
+                            <DataGridTextColumn Header="ИТОГО (₽)" Binding="{Binding TotalPayment, StringFormat=N0}" Width="100"/>
+                            <DataGridTextColumn Header="Баланс (₽)" Binding="{Binding Balance, StringFormat=N0}" Width="90"/>
+                        </DataGrid.Columns>
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding OrdersThisMonth}" Value="0">
+                                        <Setter Property="Foreground" Value="#9E9E9E"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </StackPanel>
+            </materialDesign:Card>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

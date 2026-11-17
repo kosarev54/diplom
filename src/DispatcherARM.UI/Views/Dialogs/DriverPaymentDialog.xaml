@@ -1,0 +1,105 @@
+<Window x:Class="DispatcherARM.UI.Views.Dialogs.DriverPaymentDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Расчёт зарплаты водителя" Width="680" Height="620"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource MaterialDesign.Brush.Background}"
+        Loaded="Dialog_Loaded">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Шапка -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+            <materialDesign:PackIcon Kind="CurrencyRub" Width="36" Height="36"
+                                     Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                     VerticalAlignment="Center" Margin="0,0,12,0" />
+            <StackPanel>
+                <TextBlock x:Name="TitleText" Text="Расчёт зарплаты"
+                           Style="{StaticResource MaterialDesignHeadline6TextBlock}" />
+                <TextBlock x:Name="PeriodText" Text="за текущий месяц"
+                           Foreground="Gray" FontSize="12" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Период -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+            <DatePicker x:Name="DateFrom" materialDesign:HintAssist.Hint="С даты"
+                        materialDesign:HintAssist.IsFloating="True"
+                        Width="160" Margin="0,0,12,0" />
+            <DatePicker x:Name="DateTo" materialDesign:HintAssist.Hint="По дату"
+                        materialDesign:HintAssist.IsFloating="True"
+                        Width="160" Margin="0,0,12,0" />
+            <Button Content="Рассчитать" Click="Recalculate_Click"
+                    Style="{StaticResource MaterialDesignOutlinedButton}" />
+        </StackPanel>
+
+        <!-- Детализация маршрутов -->
+        <GroupBox Grid.Row="2" Header="Выполненные рейсы за период"
+                  Style="{StaticResource MaterialDesignCardGroupBox}" Margin="0,0,0,12">
+            <DataGrid x:Name="RoutesGrid"
+                      AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                      materialDesign:DataGridAssist.CellPadding="6 3" HeadersVisibility="Column">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Дата"       Binding="{Binding Date, StringFormat=dd.MM.yyyy}" Width="85" />
+                    <DataGridTextColumn Header="Маршрут"    Binding="{Binding Name}"                          Width="*" />
+                    <DataGridTextColumn Header="км"         Binding="{Binding TotalDistanceKm, StringFormat=F1}" Width="55" />
+                    <DataGridTextColumn Header="Точек"      Binding="{Binding WaypointsCount}"                Width="55" />
+                    <DataGridTextColumn Header="За км (₽)"  Binding="{Binding KmPay, StringFormat=N0}"       Width="75" />
+                    <DataGridTextColumn Header="За дост. (₽)" Binding="{Binding DeliveryPay, StringFormat=N0}" Width="80" />
+                    <DataGridTextColumn Header="Итого (₽)"  Binding="{Binding TotalPay, StringFormat=N0}"    Width="80" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <!-- Итоги расчёта -->
+        <materialDesign:Card Grid.Row="3" Padding="16" Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock x:Name="BaseText" Text="0 ₽"
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                               HorizontalAlignment="Center" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                    <TextBlock Text="Оклад" Foreground="Gray" FontSize="11" HorizontalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                    <TextBlock x:Name="KmPayText" Text="0 ₽"
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                               HorizontalAlignment="Center" Foreground="#7B1FA2" />
+                    <TextBlock Text="За км" Foreground="Gray" FontSize="11" HorizontalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                    <TextBlock x:Name="DelivPayText" Text="0 ₽"
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                               HorizontalAlignment="Center" Foreground="#2E7D32" />
+                    <TextBlock Text="За доставки" Foreground="Gray" FontSize="11" HorizontalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                    <TextBlock x:Name="TotalPayText" Text="0 ₽"
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                               HorizontalAlignment="Center" Foreground="#E65100" FontWeight="Bold" />
+                    <TextBlock Text="ИТОГО К ВЫПЛАТЕ" Foreground="Gray" FontSize="11" HorizontalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Кнопки -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Экспорт расчёта (CSV)" Click="Export_Click"
+                    Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,8,0" />
+            <Button Content="Закрыть" IsCancel="True"
+                    Style="{StaticResource MaterialDesignRaisedButton}" />
+        </StackPanel>
+    </Grid>
+</Window>

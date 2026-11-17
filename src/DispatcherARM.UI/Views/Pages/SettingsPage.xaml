@@ -1,0 +1,171 @@
+<UserControl x:Class="DispatcherARM.UI.Views.Pages.SettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24,16" MaxWidth="680">
+
+            <!-- Заголовок -->
+            <TextBlock Text="Настройки системы" FontSize="20" FontWeight="SemiBold"
+                       Foreground="#1E3A5F" Margin="0,0,0,20"/>
+
+            <!-- ── Организация ────────────────────────────────────────────── -->
+            <Border Background="White" BorderBrush="#DDE2EC" BorderThickness="1"
+                    CornerRadius="4" Padding="20" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="РЕКВИЗИТЫ ОРГАНИЗАЦИИ" FontSize="11" FontWeight="Bold"
+                               Foreground="#6B7280" Margin="0,0,0,14"/>
+
+                    <TextBlock Text="Наименование организации" FontSize="12" Foreground="#374151" Margin="0,0,0,4"/>
+                    <TextBox x:Name="OrgNameBox" Margin="0,0,0,10" Padding="8,6"
+                             BorderBrush="#D1D5DB" BorderThickness="1"/>
+
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="ИНН" FontSize="12" Foreground="#374151" Margin="0,0,0,4"/>
+                            <TextBox x:Name="OrgInnBox" Padding="8,6" BorderBrush="#D1D5DB" BorderThickness="1"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ── Депо ──────────────────────────────────────────────────── -->
+            <Border Background="White" BorderBrush="#DDE2EC" BorderThickness="1"
+                    CornerRadius="4" Padding="20" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="КООРДИНАТЫ ДЕПО (начальная точка маршрутов)" FontSize="11" FontWeight="Bold"
+                               Foreground="#6B7280" Margin="0,0,0,14"/>
+
+                    <TextBlock Text="Адрес депо" FontSize="12" Foreground="#374151" Margin="0,0,0,4"/>
+                    <TextBox x:Name="DepotAddressBox" Margin="0,0,0,10" Padding="8,6"
+                             BorderBrush="#D1D5DB" BorderThickness="1"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Широта" FontSize="12" Foreground="#374151" Margin="0,0,0,4"/>
+                            <TextBox x:Name="DepotLatBox" Text="55.7558" Padding="8,6"
+                                     BorderBrush="#D1D5DB" BorderThickness="1"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Долгота" FontSize="12" Foreground="#374151" Margin="0,0,0,4"/>
+                            <TextBox x:Name="DepotLonBox" Text="37.6173" Padding="8,6"
+                                     BorderBrush="#D1D5DB" BorderThickness="1"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ── OSRM ──────────────────────────────────────────────────── -->
+            <Border Background="White" BorderBrush="#DDE2EC" BorderThickness="1"
+                    CornerRadius="4" Padding="20" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="МАРШРУТИЗАЦИЯ (OSRM)" FontSize="11" FontWeight="Bold"
+                               Foreground="#6B7280" Margin="0,0,0,14"/>
+
+                    <CheckBox x:Name="UseLocalOsrm" Content="Использовать локальный OSRM-сервер"
+                              Margin="0,0,0,10"/>
+
+                    <TextBlock Text="URL публичного сервера" FontSize="12" Foreground="#374151" Margin="0,0,0,4"/>
+                    <TextBox x:Name="PublicUrlBox" Text="https://router.project-osrm.org"
+                             Margin="0,0,0,10" Padding="8,6"
+                             BorderBrush="#D1D5DB" BorderThickness="1"/>
+
+                    <TextBlock Text="URL локального сервера" FontSize="12" Foreground="#374151" Margin="0,0,0,4"/>
+                    <TextBox x:Name="LocalUrlBox" Text="http://localhost:5000"
+                             Padding="8,6" BorderBrush="#D1D5DB" BorderThickness="1"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ── Интеграция ─────────────────────────────────────────────── -->
+            <Border Background="White" BorderBrush="#DDE2EC" BorderThickness="1"
+                    CornerRadius="4" Padding="20" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="ИНТЕГРАЦИЯ С 1С" FontSize="11" FontWeight="Bold"
+                               Foreground="#6B7280" Margin="0,0,0,14"/>
+
+                    <TextBlock Text="Папка обмена файлами" FontSize="12" Foreground="#374151" Margin="0,0,0,4"/>
+                    <TextBox x:Name="ExchangeFolderBox" Padding="8,6"
+                             BorderBrush="#D1D5DB" BorderThickness="1" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="Порт веб-сервера заявок" FontSize="12" Foreground="#374151" Margin="0,0,0,4"/>
+                    <TextBox x:Name="WebPortBox" Text="5050" Width="120" HorizontalAlignment="Left"
+                             Padding="8,6" BorderBrush="#D1D5DB" BorderThickness="1"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ── Тарифы ─────────────────────────────────────────────────── -->
+            <Border Background="White" BorderBrush="#DDE2EC" BorderThickness="1"
+                    CornerRadius="4" Padding="20" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="ТАРИФЫ И СТОИМОСТЬ" FontSize="11" FontWeight="Bold"
+                               Foreground="#6B7280" Margin="0,0,0,14"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Цена топлива (₽/л)" FontSize="12" Foreground="#374151" Margin="0,0,0,4"/>
+                            <TextBox x:Name="FuelPriceBox" Text="63.00" Padding="8,6"
+                                     BorderBrush="#D1D5DB" BorderThickness="1"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Комиссия водителя (% от заказа)" FontSize="12" Foreground="#374151" Margin="0,0,0,4"/>
+                            <TextBox x:Name="CommissionBox" Text="15.0" Padding="8,6"
+                                     BorderBrush="#D1D5DB" BorderThickness="1"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ── Кнопки ─────────────────────────────────────────────────── -->
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,24">
+                <Button Content="Сохранить настройки" Click="SaveOsrmSettings_Click"
+                        Background="#1E3A5F" Foreground="White"
+                        Padding="16,8" BorderThickness="0" Cursor="Hand"
+                        FontSize="13" FontWeight="SemiBold" Margin="0,0,12,0"/>
+                <Button Content="Сбросить к умолчаниям" Click="ResetDefaults_Click"
+                        Background="#F3F4F6" Foreground="#374151"
+                        Padding="16,8" BorderThickness="1" BorderBrush="#D1D5DB"
+                        FontSize="13" Cursor="Hand"/>
+            </StackPanel>
+
+            <!-- ── Журнал приложения ─────────────────────────────────────── -->
+            <Border Background="White" BorderBrush="#DDE2EC" BorderThickness="1"
+                    CornerRadius="4" Padding="20" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="ЖУРНАЛ ПРИЛОЖЕНИЯ" FontSize="11" FontWeight="Bold"
+                               Foreground="#6B7280" Margin="0,0,0,14"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="Обновить журнал" Click="RefreshLog_Click"
+                                Height="30" Padding="12,0" Cursor="Hand"
+                                Background="#1E3A5F" Foreground="White" BorderThickness="0"/>
+                        <Button Content="Открыть папку" Click="OpenLogFolder_Click"
+                                Height="30" Padding="12,0" Margin="8,0,0,0" Cursor="Hand"
+                                Background="White" BorderBrush="#D1D5DB" BorderThickness="1"/>
+                    </StackPanel>
+                    <TextBox x:Name="LogViewBox" IsReadOnly="True" Height="160"
+                             FontFamily="Consolas" FontSize="11"
+                             Background="#1E2030" Foreground="#A8B5C8"
+                             BorderBrush="#374151" BorderThickness="1"
+                             VerticalScrollBarVisibility="Auto"
+                             HorizontalScrollBarVisibility="Auto"
+                             TextWrapping="NoWrap"/>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

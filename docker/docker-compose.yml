@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: dispatcher_arm_db
+    environment:
+      POSTGRES_DB: dispatcher_arm
+      POSTGRES_USER: dispatcher
+      POSTGRES_PASSWORD: dispatcher_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Локальный OSRM-сервер (опционально)
+  # Для запуска необходимо предварительно подготовить данные:
+  # 1. Скачать данные OSM: wget https://download.geofabrik.de/russia/central-fed-district-latest.osm.pbf -O osrm-data/data.osm.pbf
+  # 2. Извлечь: docker run -t -v ./osrm-data:/data osrm/osrm-backend osrm-extract -p /opt/car.lua /data/data.osm.pbf
+  # 3. Партиция: docker run -t -v ./osrm-data:/data osrm/osrm-backend osrm-partition /data/data.osrm
+  # 4. Кастомизация: docker run -t -v ./osrm-data:/data osrm/osrm-backend osrm-customize /data/data.osrm
+  # 5. Раскомментировать сервис ниже и запустить docker-compose up
+
+  # osrm:
+  #   image: osrm/osrm-backend
+  #   container_name: dispatcher_arm_osrm
+  #   command: osrm-routed --algorithm mld /data/data.osrm
+  #   ports:
+  #     - "5000:5000"
+  #   volumes:
+  #     - ./osrm-data:/data
+  #   restart: unless-stopped
+
+volumes:
+  pgdata:

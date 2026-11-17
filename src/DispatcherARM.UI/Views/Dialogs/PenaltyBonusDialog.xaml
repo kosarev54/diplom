@@ -1,0 +1,70 @@
+<Window x:Class="DispatcherARM.UI.Views.Dialogs.PenaltyBonusDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Штраф / Бонус водителю" Width="480" Height="380"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanMinimize"
+        Background="#F5F7FA">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="56"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="56"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Background="#1E3A5F">
+            <TextBlock x:Name="DialogTitle" Text="Штраф / Бонус" Foreground="White"
+                       FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Margin="20,0"/>
+        </Border>
+
+        <!-- Body -->
+        <StackPanel Grid.Row="1" Margin="24,20">
+            <!-- Driver info -->
+            <Border Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1"
+                    CornerRadius="4" Padding="12,8" Margin="0,0,0,16">
+                <TextBlock x:Name="DriverInfoText" FontSize="13" Foreground="#1E3A5F"
+                           Text="Водитель: —"/>
+            </Border>
+
+            <!-- Type -->
+            <TextBlock Text="Тип операции" FontSize="12" Foreground="#374151" Margin="0,0,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                <RadioButton x:Name="BonusRadio" Content="🎁  Бонус" GroupName="TxType"
+                             IsChecked="True" Margin="0,0,20,0" FontSize="13"
+                             Foreground="#16A34A"/>
+                <RadioButton x:Name="PenaltyRadio" Content="⚠  Штраф" GroupName="TxType"
+                             FontSize="13" Foreground="#DC2626"/>
+            </StackPanel>
+
+            <!-- Amount -->
+            <TextBlock Text="Сумма (₽)" FontSize="12" Foreground="#374151" Margin="0,0,0,4"/>
+            <TextBox x:Name="AmountBox" Padding="10,7" FontSize="14"
+                     BorderBrush="#D1D5DB" BorderThickness="1" Margin="0,0,0,14"
+                     Width="200" HorizontalAlignment="Left"
+                     Text="500"/>
+
+            <!-- Comment -->
+            <TextBlock Text="Комментарий (обязательно)" FontSize="12" Foreground="#374151" Margin="0,0,0,4"/>
+            <TextBox x:Name="CommentBox" Padding="10,7" FontSize="13"
+                     BorderBrush="#D1D5DB" BorderThickness="1"
+                     TextWrapping="Wrap" Height="64" AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"/>
+
+            <TextBlock x:Name="ErrorText" Foreground="#DC2626" FontSize="12"
+                       Margin="0,8,0,0" Visibility="Collapsed" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="White" BorderBrush="#E5E7EB" BorderThickness="0,1,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="16,0">
+                <Button Content="Отмена" IsCancel="True" Width="90" Height="34"
+                        Margin="0,0,8,0"
+                        Background="White" BorderBrush="#D1D5DB" BorderThickness="1"
+                        Cursor="Hand"/>
+                <Button x:Name="ConfirmBtn" Content="Применить" Width="110" Height="34"
+                        Background="#1E3A5F" Foreground="White" BorderThickness="0"
+                        Cursor="Hand" Click="Confirm_Click"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

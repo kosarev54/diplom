@@ -1,0 +1,29 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.ide
+.vscode/
+# Build artifacts
+*.exe
+*.dll
+*.pdb
+*.exe.config
+# NuGet packages
+*.nupkg
+# Resharper
+_ReSharper*/
+# Rider
+.idea/
+# VS folders
+.vs/
+# Logs
+*.log
+# Temporary files
+*.tmp
+# Publish output
+publish/
+# End of file

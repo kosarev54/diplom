@@ -1,0 +1,189 @@
+<Window x:Class="DispatcherARM.UI.Views.Dialogs.DriverDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Водитель" Width="620" Height="660"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
+        Background="{DynamicResource MaterialDesign.Brush.Background}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Шапка -->
+        <Border Background="#3F51B5" Padding="20,14">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="AccountEdit" Width="28" Height="28"
+                                         Foreground="White" VerticalAlignment="Center"
+                                         Margin="0,0,12,0"/>
+                <TextBlock x:Name="DialogTitle" Text="Новый водитель"
+                           Foreground="White" FontSize="18" FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Поля -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="24,16">
+
+                <!-- Личные данные -->
+                <TextBlock Text="ЛИЧНЫЕ ДАННЫЕ" FontSize="11" FontWeight="Bold"
+                           Foreground="#6B7280" Margin="0,0,0,12"/>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="FullNameBox"
+                             materialDesign:HintAssist.Hint="ФИО *"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                    <TextBox x:Name="PhoneBox" Grid.Column="2"
+                             materialDesign:HintAssist.Hint="Телефон *"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="EmailBox"
+                             materialDesign:HintAssist.Hint="Email"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                    <DatePicker x:Name="BirthDatePicker" Grid.Column="2"
+                                materialDesign:HintAssist.Hint="Дата рождения"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
+                </Grid>
+
+                <TextBox x:Name="AddressBox"
+                         materialDesign:HintAssist.Hint="Адрес проживания"
+                         materialDesign:HintAssist.IsFloating="True"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Margin="0,0,0,16"/>
+
+                <!-- Водительское удостоверение -->
+                <TextBlock Text="ВОДИТЕЛЬСКОЕ УДОСТОВЕРЕНИЕ" FontSize="11" FontWeight="Bold"
+                           Foreground="#6B7280" Margin="0,0,0,12"/>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="LicenseBox"
+                             materialDesign:HintAssist.Hint="Номер ВУ *"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                    <TextBox x:Name="LicenseCatBox" Grid.Column="2"
+                             materialDesign:HintAssist.Hint="Категории (B, C, E...)"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                </Grid>
+
+                <DatePicker x:Name="LicenseExpiryPicker"
+                            materialDesign:HintAssist.Hint="Действует до"
+                            materialDesign:HintAssist.IsFloating="True"
+                            Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                            Margin="0,0,0,16"/>
+
+                <!-- Работа -->
+                <TextBlock Text="РАБОТА И ОПЛАТА" FontSize="11" FontWeight="Bold"
+                           Foreground="#6B7280" Margin="0,0,0,12"/>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <DatePicker x:Name="HireDatePicker"
+                                materialDesign:HintAssist.Hint="Дата приёма на работу"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
+                    <ComboBox x:Name="StatusBox" Grid.Column="2"
+                              materialDesign:HintAssist.Hint="Статус"
+                              materialDesign:HintAssist.IsFloating="True"
+                              Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                        <ComboBoxItem Content="Доступен" Tag="Available" IsSelected="True"/>
+                        <ComboBoxItem Content="В рейсе" Tag="OnRoute"/>
+                        <ComboBoxItem Content="Недоступен" Tag="Unavailable"/>
+                    </ComboBox>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="SalaryBox"
+                             materialDesign:HintAssist.Hint="Оклад (₽/мес)"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                    <TextBox x:Name="RateKmBox" Grid.Column="2"
+                             materialDesign:HintAssist.Hint="Ставка ₽/км"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                    <TextBox x:Name="RateDelivBox" Grid.Column="4"
+                             materialDesign:HintAssist.Hint="Ставка ₽/доставка"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="ScheduleBox"
+                             materialDesign:HintAssist.Hint="График работы (5/2, 2/2...)"
+                             materialDesign:HintAssist.IsFloating="True"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                    <ComboBox x:Name="VehicleBox" Grid.Column="2"
+                              materialDesign:HintAssist.Hint="Транспортное средство"
+                              materialDesign:HintAssist.IsFloating="True"
+                              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                              DisplayMemberPath="DisplayText"/>
+                </Grid>
+
+                <TextBox x:Name="NotesBox"
+                         materialDesign:HintAssist.Hint="Примечания"
+                         materialDesign:HintAssist.IsFloating="True"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         AcceptsReturn="True" Height="60" TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto" Margin="0,0,0,8"/>
+
+                <TextBlock x:Name="ErrorText" Foreground="#E53935"
+                           Margin="0,4,0,0" Visibility="Collapsed"
+                           FontSize="12"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Кнопки -->
+        <Border Grid.Row="2" Background="White"
+                BorderBrush="#E8EAF0" BorderThickness="0,1,0,0"
+                Padding="20,12">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Отмена" IsCancel="True"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,8,0"/>
+                <Button Content="💾 Сохранить" Click="Save_Click"
+                        Style="{StaticResource MaterialDesignRaisedButton}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

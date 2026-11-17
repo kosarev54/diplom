@@ -1,0 +1,60 @@
+<UserControl x:Class="DispatcherARM.UI.Views.Pages.RoutesPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             Loaded="RoutesPage_Loaded">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Margin="0,0,0,12">
+            <TextBlock Text="Маршруты" Style="{StaticResource MaterialDesignHeadline5TextBlock}" />
+            <Button Content="Построить маршрут" Click="BuildRoute_Click"
+                    DockPanel.Dock="Right" HorizontalAlignment="Right"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    materialDesign:ButtonAssist.CornerRadius="4" />
+        </DockPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8">
+            <DatePicker x:Name="DateFilter" SelectedDate="{x:Static sys:DateTime.Today}"
+                        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                        materialDesign:HintAssist.Hint="Дата"
+                        Width="180" Margin="0,0,8,0" />
+            <Button Content="Показать" Click="FilterByDate_Click"
+                    Style="{StaticResource MaterialDesignOutlinedButton}" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="2" Text="💡 Двойной клик по строке — открыть карточку маршрута"
+                   Foreground="Gray" FontSize="11" Margin="0,0,0,8" />
+
+        <DataGrid x:Name="RoutesGrid" Grid.Row="3"
+                  AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                  materialDesign:DataGridAssist.CellPadding="8 4" HeadersVisibility="Column"
+                  MouseDoubleClick="RoutesGrid_DoubleClick">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*" />
+                <DataGridTextColumn Header="Дата" Binding="{Binding Date, StringFormat=dd.MM.yyyy}" Width="100" />
+                <DataGridTextColumn Header="Водитель" Binding="{Binding Driver.FullName}" Width="150" />
+                <DataGridTextColumn Header="ТС" Binding="{Binding Vehicle.LicensePlate}" Width="90" />
+                <DataGridTextColumn Header="Дистанция (км)" Binding="{Binding TotalDistanceKm, StringFormat=F1}" Width="110" />
+                <DataGridTextColumn Header="Время (мин)" Binding="{Binding TotalTimeMinutes, StringFormat=F0}" Width="100" />
+                <DataGridTextColumn Header="Топливо (л)" Binding="{Binding FuelCostEstimate, StringFormat=F1}" Width="95" />
+                <DataGridTextColumn Header="Алгоритм" Binding="{Binding OptimizationMethod}" Width="140" />
+                <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="100" />
+            </DataGrid.Columns>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Cursor" Value="Hand" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+        </DataGrid>
+    </Grid>
+</UserControl>
