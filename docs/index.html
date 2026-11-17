@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2F5D8A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Водитель — АРМ диспетчера</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root{--p:#2F5D8A;--pd:#234A70;--pl:#E3EAF2;--ok:#2E7A4E;--okl:#E7F1EB;--warn:#A86A12;--warnl:#F7EFE2;
+        --bad:#B03A3A;--badl:#F6E8E8;--bg:#F1F2F4;--card:#fff;--line:#D5D9DF;--text:#1F2328;--muted:#59626D}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);background:var(--bg)}
+  button{font:inherit;border:0;border-radius:4px;padding:13px 16px;font-weight:600;cursor:pointer}
+  button:disabled{opacity:.45}
+  .btn{background:var(--p);color:#fff;width:100%}
+  .btn.ok{background:var(--ok)} .btn.warn{background:var(--warn)} .btn.ghost{background:#fff;color:var(--pd);border:1px solid var(--line)}
+  .btn.small{width:auto;padding:8px 12px;font-size:14px;border-radius:4px}
+  input{font:inherit;width:100%;padding:14px;border:1px solid var(--line);border-radius:4px;margin:6px 0 12px;background:#fff}
+  .hidden{display:none!important}
+
+  /* Вход */
+  #login{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+  .login-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:26px 22px;width:100%;max-width:380px}
+  .logo{font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-align:center;text-transform:uppercase;margin:0 0 8px}
+  h1{font-size:21px;margin:0 0 4px;text-align:center} .sub{color:var(--muted);text-align:center;margin:0 0 20px;font-size:14px}
+  .err{background:var(--badl);color:var(--bad);border-radius:4px;padding:10px 12px;font-size:14px;margin-bottom:10px}
+
+  /* Основной экран */
+  #app{position:fixed;inset:0}
+  #map{position:absolute;inset:0;background:#dfe6f3}
+  #nomap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);padding:30px;text-align:center}
+  .top{position:absolute;left:10px;right:10px;top:calc(10px + env(safe-area-inset-top));display:flex;gap:8px;align-items:center;z-index:500}
+  .chip{background:#fff;border-radius:4px;padding:9px 12px;border:1px solid var(--line);font-size:14px;display:flex;align-items:center;gap:8px}
+  .chip.grow{flex:1;min-width:0} .chip .name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dot{width:10px;height:10px;border-radius:50%;background:#aaa;flex:none} .dot.on{background:var(--ok)} .dot.wait{background:var(--warn)} .dot.off{background:var(--bad)}
+  .iconbtn{background:#fff;border-radius:4px;width:auto;height:40px;padding:0 12px;border:1px solid var(--line);font-size:14px;color:var(--pd)}
+
+  .sheet{position:absolute;left:0;right:0;bottom:0;z-index:600;background:var(--bg);border-radius:8px 8px 0 0;
+         border-top:1px solid var(--line);box-shadow:0 -2px 8px rgba(0,0,0,.08);max-height:72%;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+  .grip{width:44px;height:5px;border-radius:3px;background:#cfd5e2;margin:8px auto 4px}
+  .sheet-head{display:flex;align-items:center;justify-content:space-between;padding:4px 16px 8px}
+  .sheet-head b{font-size:17px}
+  .list{overflow:auto;padding:0 12px 12px}
+  .card{background:#fff;border-radius:4px;padding:14px;margin-bottom:10px;border:1px solid var(--line)}
+  .card.current{border:2px solid var(--p)}
+  .row{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+  .num{font-weight:700} .muted{color:var(--muted);font-size:13px}
+  .addr{font-size:16px;font-weight:600;margin:8px 0 4px}
+  .badge{font-size:12px;font-weight:600;border-radius:3px;padding:4px 8px;white-space:nowrap}
+  .b-Assigned{background:var(--pl);color:var(--pd)} .b-Loading{background:var(--warnl);color:var(--warn)}
+  .b-InTransit{background:var(--okl);color:var(--ok)} .b-Delivered{background:#eef0f4;color:var(--muted)} .b-wait{background:var(--warnl);color:var(--warn)}
+  .facts{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+  .fact{background:var(--bg);border-radius:3px;padding:5px 8px;font-size:13px}
+  .actions{display:flex;gap:8px;margin-top:10px} .actions>*{flex:1}
+  .links{display:flex;gap:8px;margin-top:8px} .links a{flex:1;text-align:center;text-decoration:none;background:#fff;border:1px solid var(--line);color:var(--pd);border-radius:4px;padding:10px 6px;font-weight:600;font-size:14px}
+  .empty{text-align:center;color:var(--muted);padding:26px 10px}
+  .toast{position:fixed;left:14px;right:14px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:900;background:#1F2328;color:#fff;border-radius:4px;padding:13px 15px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+  .gpsinfo{margin:0 12px 10px;background:var(--warnl);color:#6b4510;border-radius:4px;padding:10px 12px;font-size:13px;line-height:1.35}
+  .switch{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+  .switch input{width:auto;margin:0}
+  .leaflet-control-attribution{font-size:9px}
+  /* Груз */
+  .goods{background:var(--bg);border-radius:4px;margin:8px 0;padding:0}
+  .goods summary{list-style:none;padding:9px 11px;font-size:14px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;gap:8px}
+  .goods summary::-webkit-details-marker{display:none}
+  .goods summary .muted{font-weight:400}
+  .goods[open] summary{border-bottom:1px solid var(--line)}
+  .goods ul{margin:0;padding:6px 11px 9px;list-style:none}
+  .goods li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:14px;border-bottom:1px dashed var(--line)}
+  .goods li:last-child{border-bottom:0}
+  .goods .qty{font-weight:700;white-space:nowrap}
+  .goods .art{color:var(--muted);font-size:12px}
+  .collect{background:var(--warnl);color:#6b4510;border-radius:4px;padding:8px 11px;font-size:14px;font-weight:600;margin:6px 0}
+  .srv{font-size:13px;color:var(--muted);text-align:center;margin-top:14px;word-break:break-all}
+  .srv a{color:var(--pd)}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ Вход ═══════════ -->
+<div id="login">
+  <div class="login-card">
+    <div class="logo">АРМ диспетчера</div>
+    <h1>Приложение водителя</h1>
+    <p class="sub">Доставка товаров клиентам · вход под учётной записью водителя из АРМ диспетчера</p>
+    <div id="loginErr" class="err hidden"></div>
+    <label class="muted">Логин</label>
+    <input id="lg" autocomplete="username" autocapitalize="none" placeholder="driver1">
+    <label class="muted">Пароль</label>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="••••••">
+    <button class="btn" id="loginBtn" onclick="doLogin()">Войти</button>
+    <div id="srvBox" class="hidden">
+      <div id="srvEdit" class="hidden" style="margin-top:16px">
+        <label class="muted">Адрес сервера диспетчера (https://…)</label>
+        <input id="srvInput" autocapitalize="none" inputmode="url" placeholder="https://xxxx.trycloudflare.com">
+        <button class="btn ghost" onclick="saveServer()">Сохранить адрес</button>
+      </div>
+      <div class="srv" id="srvLine"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ Основной экран ═══════════ -->
+<div id="app" class="hidden">
+  <div id="map"></div>
+  <div id="nomap" class="hidden">Карта не загрузилась (нет интернета). Заказы и отправка местоположения работают.</div>
+
+  <div class="top">
+    <div class="chip grow"><span id="gpsDot" class="dot"></span><span class="name" id="who">Водитель</span></div>
+    <button class="iconbtn" title="Моё положение" onclick="centerMe()">Я на карте</button>
+    <button class="iconbtn" title="Выход" onclick="logout()">Выйти</button>
+  </div>
+
+  <div class="sheet">
+    <div class="grip"></div>
+    <div class="sheet-head">
+      <b id="sheetTitle">Мои доставки</b>
+      <button class="btn ghost small" onclick="refresh(true)">Обновить</button>
+    </div>
+    <div id="gpsInfo" class="gpsinfo hidden"></div>
+    <div class="list" id="list"><div class="empty">Загрузка…</div></div>
+    <div style="padding:0 16px 12px" id="simBox" class="hidden">
+      <label class="switch"><input type="checkbox" id="simChk" onchange="toggleSim()"> Имитация движения (демонстрация без GPS)</label>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+"use strict";
+const S = { token: localStorage.getItem("drvToken") || "", me: null, tasks: [], map: null, meMarker: null,
+            orderMarkers: [], line: null, pos: null, watchId: null, simTimer: null, lastSent: 0,
+            pollTimer: null, wakeLock: null, knownIds: new Set(), firstLoad: true };
+
+// ─── Сервер диспетчера ──────────────────────────────────
+// Страницу отдаёт сама программа (тогда сервер — тот же адрес) или она опубликована
+// на GitHub Pages (https://<логин>.github.io/<репозиторий>/). Во втором случае адрес
+// программы берётся из ссылки (?server=…), из файла server.json в репозитории
+// (его обновляет программа при запуске туннеля) или вводится вручную.
+const PARAMS = new URLSearchParams(location.search);
+const HOSTED = /\.github\.io$/i.test(location.hostname) || location.protocol === "file:" || PARAMS.has("server");
+function normServer(u) {
+  u = String(u || "").trim(); if (!u) return "";
+  if (!/^https?:\/\//i.test(u)) u = "https://" + u;
+  return u.replace(/\/+$/, "").replace(/\/driver$/i, "");
+}
+if (PARAMS.get("server")) {
+  localStorage.setItem("drvServer", normServer(PARAMS.get("server")));
+  history.replaceState(null, "", location.pathname);
+}
+let BASE = HOSTED ? (localStorage.getItem("drvServer") || "") : "";
+
+/** Адрес из server.json в репозитории GitHub (публикует программа диспетчера). */
+async function discoverServer() {
+  if (!/\.github\.io$/i.test(location.hostname)) return "";
+  const owner = location.hostname.split(".")[0];
+  const seg = location.pathname.split("/").filter(Boolean)[0];
+  const repo = seg && !/\.html?$/i.test(seg) ? seg : location.hostname;
+  const tries = [
+    `https://api.github.com/repos/${owner}/${repo}/contents/docs/server.json`,
+    `https://api.github.com/repos/${owner}/${repo}/contents/server.json`
+  ];
+  for (const u of tries) {
+    try {
+      const r = await fetch(u + "?t=" + Date.now(), { headers: { "Accept": "application/vnd.github.raw+json" }, cache: "no-store" });
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (j && j.server) return normServer(j.server);
+    } catch (e) {}
+  }
+  try {   // запасной вариант: файл рядом со страницей (обновляется GitHub Pages с задержкой)
+    const r = await fetch("server.json?t=" + Date.now(), { cache: "no-store" });
+    if (r.ok) { const j = await r.json(); if (j && j.server) return normServer(j.server); }
+  } catch (e) {}
+  return "";
+}
+async function ensureServer(force) {
+  if (!HOSTED) return true;
+  if (BASE && !force) return true;
+  const found = await discoverServer();
+  if (found) { BASE = found; localStorage.setItem("drvServer", found); }
+  showServer();
+  return !!BASE;
+}
+function showServer() {
+  const box = document.getElementById("srvBox");
+  box.classList.toggle("hidden", !HOSTED);
+  if (!HOSTED) return;
+  document.getElementById("srvLine").innerHTML = BASE
+    ? `Сервер: ${esc(BASE)} · <a href="#" onclick="editServer();return false">изменить</a>`
+    : `Программа диспетчера сейчас не в сети. Попросите диспетчера включить «Доступ из интернета» или <a href="#" onclick="editServer();return false">введите адрес</a>.`;
+}
+function editServer() {
+  document.getElementById("srvEdit").classList.remove("hidden");
+  document.getElementById("srvInput").value = BASE; document.getElementById("srvInput").focus();
+}
+function saveServer() {
+  BASE = normServer(document.getElementById("srvInput").value);
+  if (BASE) localStorage.setItem("drvServer", BASE); else localStorage.removeItem("drvServer");
+  document.getElementById("srvEdit").classList.add("hidden"); showServer();
+}
+
+// ─── HTTP ───────────────────────────────────────────────
+async function api(method, url, body, retried) {
+  if (HOSTED && !BASE && !(await ensureServer(true))) throw new Error("Не задан адрес сервера диспетчера");
+  let r;
+  try {
+    r = await fetch(BASE + url, { method, headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "1",
+              ...(S.token ? { "Authorization": "Bearer " + S.token } : {}) },
+              body: body ? JSON.stringify(body) : undefined });
+  } catch (e) {
+    // Адрес туннеля меняется при каждом запуске программы — пробуем узнать новый
+    if (HOSTED && !retried) {
+      const old = BASE;
+      if (await ensureServer(true) && BASE !== old) return api(method, url, body, true);
+    }
+    throw new Error("Нет связи с сервером диспетчера");
+  }
+  let data = {}; try { data = await r.json(); } catch (e) {}
+  if (r.status === 401 && url !== "/api/driver/login") { forceLogout(data.error || "Сессия истекла"); throw new Error(data.error || "401"); }
+  if (!r.ok || data.ok === false) throw new Error(data.error || ("Ошибка " + r.status));
+  return data;
+}
+function toast(msg, ms) {
+  const t = document.getElementById("toast"); t.textContent = msg; t.classList.remove("hidden");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.add("hidden"), ms || 3500);
+}
+function num(v) { return Number(v || 0).toLocaleString("ru-RU", { maximumFractionDigits: 2 }); }
+function money(v) { return Number(v || 0).toLocaleString("ru-RU", { maximumFractionDigits: 0 }); }
+function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c])); }
+
+// ─── Вход / выход ───────────────────────────────────────
+async function doLogin() {
+  const err = document.getElementById("loginErr"); err.classList.add("hidden");
+  const btn = document.getElementById("loginBtn"); btn.disabled = true;
+  try {
+    if (!(await ensureServer())) throw new Error("Не удалось найти сервер диспетчера. Введите адрес вручную (ссылка ниже).");
+    const d = await api("POST", "/api/driver/login", { login: document.getElementById("lg").value.trim(), password: document.getElementById("pw").value });
+    S.token = d.token; localStorage.setItem("drvToken", d.token);
+    if (d.mustChangePassword) toast("Администратор выдал временный пароль — смените его в программе.", 6000);
+    await start();
+  } catch (e) { err.textContent = e.message; err.classList.remove("hidden"); }
+  finally { btn.disabled = false; }
+}
+document.getElementById("pw").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+
+async function logout() {
+  if (!confirm("Выйти из приложения? Диспетчер перестанет видеть вас на карте.")) return;
+  try { await api("POST", "/api/driver/logout"); } catch (e) {}
+  forceLogout();
+}
+function forceLogout(msg) {
+  S.token = ""; localStorage.removeItem("drvToken");
+  stopGps(); stopSim(); clearInterval(S.pollTimer);
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("login").classList.remove("hidden");
+  if (msg) { const err = document.getElementById("loginErr"); err.textContent = msg; err.classList.remove("hidden"); }
+}
+
+// ─── Запуск ─────────────────────────────────────────────
+async function start() {
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  initMap();
+  await refresh();
+  startGps();
+  clearInterval(S.pollTimer);
+  S.pollTimer = setInterval(() => refresh(), 8000);   // новые заказы — не позже чем через ~8 с
+  keepScreenOn();
+}
+
+function initMap() {
+  if (S.map) return;
+  if (typeof L === "undefined") { document.getElementById("nomap").classList.remove("hidden"); return; }
+  S.map = L.map("map", { zoomControl: false }).setView([55.7558, 37.6173], 11);
+  // Esri вместо тайлов OpenStreetMap: их сервер отвечает 403 на запросы без Referer (WebView, часть мобильных браузеров).
+  var base = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, attribution: "Tiles © Esri" }).addTo(S.map);
+  var tileErr = 0;
+  base.on("tileerror", function () {
+    if (++tileErr === 6) {
+      S.map.removeLayer(base);
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png", { maxZoom: 19, subdomains: "abcd", attribution: "© OpenStreetMap, © CARTO" }).addTo(S.map);
+    }
+  });
+}
+
+async function refresh(manual) {
+  try {
+    const d = await api("GET", "/api/driver/me");
+    S.me = d; S.tasks = d.tasks || [];
+    document.getElementById("who").textContent = d.name + (d.vehicle ? " · " + d.vehicle : "");
+    document.getElementById("simBox").classList.toggle("hidden", !d.allowSimulation);
+    if (!S.pos && d.lastLocation) S.pos = { lat: d.lastLocation.lat, lon: d.lastLocation.lon };
+    if (!S.pos && d.depot && document.getElementById("simChk").checked) S.pos = { lat: d.depot.lat, lon: d.depot.lon };
+    // Новые заказы — вибрация и уведомление
+    const active = S.tasks.filter(t => t.status !== "Delivered");
+    const fresh = active.filter(t => !S.knownIds.has(t.id));
+    if (!S.firstLoad && fresh.length) { toast("Новый заказ: " + fresh.map(t => t.number).join(", "), 6000); if (navigator.vibrate) navigator.vibrate([200, 100, 200]); }
+    S.knownIds = new Set(active.map(t => t.id)); S.firstLoad = false;
+    render();
+    if (manual) toast("Список обновлён");
+  } catch (e) { if (manual) toast(e.message); }
+}
+
+// ─── Список заказов ─────────────────────────────────────
+function current() { return S.tasks.find(t => t.canDeliver) || S.tasks.find(t => t.canStart) || null; }
+
+function render() {
+  const list = document.getElementById("list");
+  const active = S.tasks.filter(t => t.status !== "Delivered");
+  document.getElementById("sheetTitle").textContent = active.length ? `Мои доставки · ${active.length}` : "Мои доставки";
+  if (!S.tasks.length) { list.innerHTML = '<div class="empty">Назначенных доставок нет.<br>Диспетчер назначит заказ — он появится здесь автоматически.<br>' +
+      '<span class="muted">Вы вошли как: ' + esc(S.me && S.me.name || "") + '. Обновлено в ' + new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) +
+      '. Если маршрут назначен другому водителю, здесь его не будет.</span></div>'; drawMap(); return; }
+  const cur = current();
+  list.innerHTML = S.tasks.map(t => {
+    const badge = t.waitingConfirm ? '<span class="badge b-wait">Ждёт подтверждения</span>' : `<span class="badge b-${t.status}">${esc(t.statusText)}</span>`;
+    const facts = [
+      t.sequence ? `Точка №${t.sequence}` : "", t.timeWindow ? `${esc(t.timeWindow)}` : "", t.deliveryDate ? `${esc(t.deliveryDate)}` : "",
+      t.weight ? `${num(t.weight)} кг` : "", t.volume ? `${num(t.volume)} м³` : "",
+      t.goodsValue > 0 ? `${money(t.goodsValue)} ₽ стоимость` : ""
+    ].filter(Boolean).map(f => `<span class="fact">${f}</span>`).join("");
+    const goods = (t.goods && t.goods.length)
+      ? `<details class="goods"${t.canDeliver ? " open" : ""}><summary>Товары <span class="muted">${esc(t.goodsSummary)}</span></summary><ul>` +
+        t.goods.map(g => `<li><span>${esc(g.name)}${g.article ? `<div class="art">арт. ${esc(g.article)}</div>` : ""}</span><span class="qty">${num(g.quantity)} ${esc(g.unit)}</span></li>`).join("") +
+        `</ul></details>`
+      : `<div class="goods"><div style="padding:9px 11px;font-size:14px">Груз${t.weight ? ` ${num(t.weight)} кг` : ""} <span class="muted">· состав не указан в заказе</span></div></div>`;
+    const collect = t.toCollect > 0 && t.status !== "Delivered" ? `<div class="collect">Получить с клиента: ${money(t.toCollect)} ₽</div>` : "";
+    const nav = (t.lat || t.lon) ? `<a href="https://yandex.ru/maps/?rtext=~${t.lat},${t.lon}&rtt=auto" target="_blank" rel="noopener">Маршрут</a>` : "";
+    const call = t.phone ? `<a href="tel:${esc(t.phone.replace(/[^\d+]/g, ""))}">Клиенту</a>` : "";
+    let btns = "";
+    if (t.canLoad)    btns += `<button class="btn warn" onclick="act(${t.id},'load')">Начать погрузку</button>`;
+    if (t.canStart)   btns += `<button class="btn" onclick="act(${t.id},'start')">Выехал к клиенту</button>`;
+    if (t.canDeliver) btns += `<button class="btn ok" onclick="act(${t.id},'deliver')">Товар передан</button>`;
+    return `<div class="card ${cur && cur.id === t.id ? "current" : ""}">
+      <div class="row"><div><div class="num">${esc(t.number)}</div><div class="muted">${esc(t.client)}</div></div>${badge}</div>
+      <div class="addr" onclick="focusOrder(${t.id})">${esc(t.address)}</div>
+      ${goods}
+      ${facts ? `<div class="facts">${facts}</div>` : ""}
+      ${collect}
+      ${t.notes ? `<div class="muted">${esc(t.notes)}</div>` : ""}
+      ${(nav || call) ? `<div class="links">${nav}${call}</div>` : ""}
+      ${btns ? `<div class="actions">${btns}</div>` : ""}
+    </div>`;
+  }).join("");
+  drawMap();
+}
+
+async function act(id, action) {
+  const t = S.tasks.find(x => x.id === id);
+  const no = t ? t.number : id;
+  let q;
+  if (action === "load") q = `Начать погрузку товара по заказу ${no}?` + (t && t.goodsSummary ? `\nПроверьте: ${t.goodsSummary}.` : "");
+  else if (action === "start") q = `Товар загружен, выезжаете к клиенту по заказу ${no}?`;
+  else q = `Товар по заказу ${no} передан клиенту?` + (t ? `\nКлиент: ${t.client}` : "") +
+           (t && t.goodsSummary ? `\nПередано: ${t.goodsSummary}.` : "") +
+           (t && t.toCollect > 0 ? `\nПолучено от клиента: ${money(t.toCollect)} ₽.` : "");
+  if (!confirm(q)) return;
+  try {
+    const d = await api("POST", `/api/driver/orders/${id}/${action}`);
+    S.tasks = d.tasks || []; render(); toast(d.message, 4500);
+    if (action === "start" && navigator.vibrate) navigator.vibrate(80);
+    sendNow();
+  } catch (e) { toast(e.message, 5000); refresh(); }
+}
+
+// ─── Карта ──────────────────────────────────────────────
+function drawMap() {
+  if (!S.map) return;
+  S.orderMarkers.forEach(m => m.remove()); S.orderMarkers = [];
+  if (S.line) { S.line.remove(); S.line = null; }
+  const cur = current();
+  S.tasks.filter(t => t.status !== "Delivered" && (t.lat || t.lon)).forEach(t => {
+    const isCur = cur && cur.id === t.id;
+    const m = L.circleMarker([t.lat, t.lon], { radius: isCur ? 11 : 8, color: "#fff", weight: 3,
+               fillColor: isCur ? "#B03A3A" : "#59626D", fillOpacity: 1 }).addTo(S.map)
+               .bindPopup(`<b>${esc(t.number)}</b><br>${esc(t.address)}`);
+    S.orderMarkers.push(m);
+  });
+  if (S.pos && cur && (cur.lat || cur.lon))
+    S.line = L.polyline([[S.pos.lat, S.pos.lon], [cur.lat, cur.lon]], { color: "#2F5D8A", weight: 3, dashArray: "6 6", opacity: .8 }).addTo(S.map);
+  drawMe();
+  const pts = S.orderMarkers.map(m => m.getLatLng()); if (S.pos) pts.push(L.latLng(S.pos.lat, S.pos.lon));
+  if (!S._fitted && pts.length) { S.map.fitBounds(L.latLngBounds(pts).pad(0.3), { maxZoom: 15 }); S._fitted = true; }
+}
+function drawMe() {
+  if (!S.map || !S.pos) return;
+  const ll = [S.pos.lat, S.pos.lon];
+  if (!S.meMarker) {
+    S.meMarker = L.marker(ll, { icon: L.divIcon({ className: "", iconSize: [18, 18], iconAnchor: [9, 9],
+      html: '<div style="width:18px;height:18px;border-radius:50%;background:#2F5D8A;border:3px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.4)"></div>' }) }).addTo(S.map);
+  } else S.meMarker.setLatLng(ll);
+}
+function centerMe() { if (S.map && S.pos) S.map.setView([S.pos.lat, S.pos.lon], 16); else toast("Местоположение ещё не определено"); }
+function focusOrder(id) { const t = S.tasks.find(x => x.id === id); if (S.map && t) S.map.setView([t.lat, t.lon], 16); }
+
+// ─── GPS ────────────────────────────────────────────────
+function setGps(state, info) {
+  document.getElementById("gpsDot").className = "dot " + state;
+  const box = document.getElementById("gpsInfo");
+  if (info) { box.innerHTML = info; box.classList.remove("hidden"); } else box.classList.add("hidden");
+}
+function startGps() {
+  if (document.getElementById("simChk").checked) return;
+  if (!("geolocation" in navigator)) { setGps("off", "Телефон не поддерживает геолокацию. Включите имитацию движения."); return; }
+  if (!window.isSecureContext) {
+    setGps("off", "Браузер не передаёт GPS по незащищённому адресу (http). Откройте приложение по ссылке https://…, " +
+                  "которую выдал диспетчер, или включите «Имитацию движения» ниже. Доставки работают и так.");
+    return;
+  }
+  setGps("wait", null);
+  S.watchId = navigator.geolocation.watchPosition(p => {
+    S.pos = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy, speed: p.coords.speed };
+    setGps("on", null); drawMe(); maybeSend();
+  }, e => {
+    const msg = e.code === 1 ? "Доступ к геолокации запрещён. Разрешите его в настройках браузера для этого сайта."
+              : "Не удаётся определить местоположение. Включите GPS на телефоне.";
+    setGps("off", msg);
+  }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
+}
+function stopGps() { if (S.watchId != null) navigator.geolocation.clearWatch(S.watchId); S.watchId = null; }
+
+function maybeSend() { if (Date.now() - S.lastSent >= 10000) sendNow(); }
+async function sendNow(sim) {
+  if (!S.pos || !S.token) return;
+  S.lastSent = Date.now();
+  try {
+    await api("POST", "/api/driver/location", { lat: S.pos.lat, lon: S.pos.lon, accuracy: S.pos.acc ?? null,
+              speed: S.pos.speed ?? null, sim: !!(sim || document.getElementById("simChk").checked) });
+    if (document.getElementById("simChk").checked) setGps("on", null);
+  } catch (e) { setGps("wait", "Нет связи с сервером диспетчера: " + esc(e.message)); }
+}
+
+// ─── Имитация движения (демонстрация без телефона / без HTTPS) ───────
+function toggleSim() {
+  if (document.getElementById("simChk").checked) {
+    stopGps();
+    if (!S.pos && S.me && S.me.depot) S.pos = { lat: S.me.depot.lat, lon: S.me.depot.lon };
+    setGps("on", null);
+    toast("Имитация: машина едет к текущему заказу (≈ 40 км/ч, ускорено ×5)");
+    S.simTimer = setInterval(simStep, 2000); simStep();
+  } else { stopSim(); startGps(); }
+}
+function stopSim() { clearInterval(S.simTimer); S.simTimer = null; }
+function simStep() {
+  const cur = current();
+  if (!S.pos) return;
+  if (cur && (cur.lat || cur.lon)) {
+    const dLat = cur.lat - S.pos.lat, dLon = cur.lon - S.pos.lon;
+    const km = Math.hypot(dLat * 111, dLon * 111 * Math.cos(S.pos.lat * Math.PI / 180));
+    const stepKm = 40 / 3600 * 2 * 5;            // 40 км/ч × 2 с × ускорение 5
+    const k = km <= stepKm ? 1 : stepKm / km;
+    S.pos = { lat: S.pos.lat + dLat * k, lon: S.pos.lon + dLon * k, speed: km > 0.02 ? 40 / 3.6 : 0 };
+  } else S.pos.speed = 0;
+  drawMe(); if (S.line && cur) S.line.setLatLngs([[S.pos.lat, S.pos.lon], [cur.lat, cur.lon]]);
+  sendNow(true);
+}
+
+// ─── Экран не гаснет, пока приложение открыто ──────────
+async function keepScreenOn() {
+  try { if ("wakeLock" in navigator) S.wakeLock = await navigator.wakeLock.request("screen"); } catch (e) {}
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.token) { keepScreenOn(); refresh(); } });
+
+showServer();
+if (HOSTED && !BASE) ensureServer(true);
+if (S.token) start().catch(() => forceLogout());
+</script>
+</body>
+</html>
