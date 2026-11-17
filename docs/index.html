@@ -147,13 +147,17 @@ const HOSTED = /\.github\.io$/i.test(location.hostname) || location.protocol ===
 function normServer(u) {
   u = String(u || "").trim(); if (!u) return "";
   if (!/^https?:\/\//i.test(u)) u = "https://" + u;
-  return u.replace(/\/+$/, "").replace(/\/driver$/i, "");
+  u = u.replace(/\/+$/, "").replace(/\/driver$/i, "");
+  // Адрес самого сайта (github.io) — не сервер программы: запросы туда дают «Ошибка 405»
+  try { const x = new URL(u); if (/\.github\.io$/i.test(x.hostname) || (location.protocol !== "file:" && x.host === location.host)) return ""; } catch (e) { return ""; }
+  return u;
 }
 if (PARAMS.get("server")) {
   localStorage.setItem("drvServer", normServer(PARAMS.get("server")));
   history.replaceState(null, "", location.pathname);
 }
-let BASE = HOSTED ? (localStorage.getItem("drvServer") || "") : "";
+let BASE = HOSTED ? normServer(localStorage.getItem("drvServer") || "") : "";
+if (HOSTED && !BASE) localStorage.removeItem("drvServer");   // убрать ошибочно сохранённый адрес сайта
 
 /** Адрес из server.json в репозитории GitHub (публикует программа диспетчера). */
 async function discoverServer() {
@@ -187,22 +191,47 @@ async function ensureServer(force) {
   showServer();
   return !!BASE;
 }
+let ONLINE = null;   // null — не проверяли, true/false — отвечает ли программа диспетчера
 function showServer() {
   const box = document.getElementById("srvBox");
   box.classList.toggle("hidden", !HOSTED);
   if (!HOSTED) return;
-  document.getElementById("srvLine").innerHTML = BASE
-    ? `Сервер: ${esc(BASE)} · <a href="#" onclick="editServer();return false">изменить</a>`
-    : `Программа диспетчера сейчас не в сети. Попросите диспетчера включить «Доступ из интернета» или <a href="#" onclick="editServer();return false">введите адрес</a>.`;
+  const edit = `<a href="#" onclick="editServer();return false">изменить</a>`;
+  document.getElementById("srvLine").innerHTML = !BASE
+    ? `Программа диспетчера сейчас не в сети. Попросите диспетчера включить «Доступ из интернета» или <a href="#" onclick="editServer();return false">введите адрес</a>.`
+    : ONLINE === false
+      ? `<b>Программа диспетчера не отвечает.</b> Она закрыта или выключен «Доступ из интернета». ` +
+        `Страница сама подключится, когда диспетчер её включит.<br><span class="muted">Адрес: ${esc(BASE)} · ${edit}</span>`
+      : `Сервер: ${esc(BASE)}${ONLINE ? " · на связи" : ""} · ${edit}`;
+}
+/** Отвечает ли программа диспетчера (быстрая проверка /api/ping). */
+async function pingServer() {
+  if (!BASE) return false;
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 7000);
+  try { const r = await fetch(BASE + "/api/ping?t=" + Date.now(), { cache: "no-store", signal: ctl.signal }); return r.ok; }
+  catch (e) { return false; } finally { clearTimeout(t); }
+}
+/** На экране входа: обновить адрес из репозитория и проверить связь; пока не в сети — повторять каждые 15 с. */
+async function checkServer() {
+  if (!HOSTED) return;
+  await ensureServer(true);
+  ONLINE = await pingServer();
+  showServer();
+  if (ONLINE) { const e = document.getElementById("loginErr"); if (/не в сети|Нет связи/.test(e.textContent)) e.classList.add("hidden"); }
+  clearTimeout(S.srvTimer);
+  if (!ONLINE && !S.token) S.srvTimer = setTimeout(checkServer, 15000);
 }
 function editServer() {
   document.getElementById("srvEdit").classList.remove("hidden");
   document.getElementById("srvInput").value = BASE; document.getElementById("srvInput").focus();
 }
 function saveServer() {
-  BASE = normServer(document.getElementById("srvInput").value);
+  const typed = document.getElementById("srvInput").value.trim();
+  BASE = normServer(typed);
+  if (typed && !BASE) toast("Это адрес самого сайта. Нужен адрес программы диспетчера (https://….trycloudflare.com) — или оставьте поле пустым, страница найдёт его сама.", 6000);
   if (BASE) localStorage.setItem("drvServer", BASE); else localStorage.removeItem("drvServer");
   document.getElementById("srvEdit").classList.add("hidden"); showServer();
+  checkServer();   // пустое поле — найти адрес программы автоматически; иначе — проверить связь
 }
 
 // ─── HTTP ───────────────────────────────────────────────
@@ -219,6 +248,8 @@ async function api(method, url, body, retried) {
       const old = BASE;
       if (await ensureServer(true) && BASE !== old) return api(method, url, body, true);
     }
+    if (HOSTED) { ONLINE = false; showServer(); if (!S.token) checkServer();
+      throw new Error("Программа диспетчера сейчас не в сети. Попросите диспетчера запустить программу и включить «Доступ из интернета»."); }
     throw new Error("Нет связи с сервером диспетчера");
   }
   let data = {}; try { data = await r.json(); } catch (e) {}
@@ -468,7 +499,7 @@ async function keepScreenOn() {
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.token) { keepScreenOn(); refresh(); } });
 
 showServer();
-if (HOSTED && !BASE) ensureServer(true);
+if (HOSTED) checkServer();   // адрес туннеля меняется — всегда берём свежий из репозитория
 if (S.token) start().catch(() => forceLogout());
 </script>
 </body>
